@@ -142,25 +142,11 @@
     gap: 12px;
     margin: 20px 0 30px;
   }
-  .logo-mark {
-    height: 42px;
-    width: auto;
-    flex: 0 0 auto;
-  }
-  .logo-text {
-    font-size: 2.2rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1;
-  }
-  .logo-text .l-rudra { color: #e58b7e; }
-  .logo-text .l-health { color: #5e93c9; }
-  .logo-text .l-ai {
-    font-size: 0.85rem;
-    color: #eec25c;
-    font-weight: 700;
-    vertical-align: super;
-    margin-left: 3px;
+  .logo-img {
+    height: auto;
+    width: 220px;
+    max-width: 70%;
+    display: block;
   }
 
   .intro-greeting {
@@ -579,13 +565,7 @@ function showIntro() {
   content.innerHTML = `
     <div class="intro">
       <div class="intro-logo">
-        <svg class="logo-mark" viewBox="0 0 54 46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="2"  y="22" width="11" height="20" rx="5.5" fill="#e58b7e"/>
-          <rect x="17" y="14" width="11" height="28" rx="5.5" fill="#eec25c"/>
-          <rect x="32" y="16" width="11" height="26" rx="5.5" fill="#93be72"/>
-          <circle cx="37.5" cy="6.5" r="5.5" fill="#93be72"/>
-        </svg>
-        <span class="logo-text"><span class="l-rudra">Rudra</span><span class="l-health">Health</span><span class="l-ai">ai</span></span>
+        <img class="logo-img" src="logo.png" alt="RudraHealth.ai" />
       </div>
       <h2 class="intro-greeting">Welcome to your daily check-in</h2>
       <p class="intro-help">Take a moment to reflect on your last 24 hours. It only takes about a minute, and there are no right or wrong answers.</p>
