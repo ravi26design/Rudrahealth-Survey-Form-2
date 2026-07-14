@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Daily Check-in Survey</title>
+<style>
+  :root {
+    --green: #7ba05b;
+    --green-dark: #6b9049;
+    --green-soft: #e9f0e1;
+    --track-dark: #2b2f36;
+    --bg: #eef0f6;
+    --card: #ffffff;
+    --ink: #2d3138;
+    --ink-soft: #6b7280;
+    --ink-faint: #9aa1ac;
+    --blue-1: #6b93c4;
+    --blue-2: #3f6fa8;
+    --shadow: 0 6px 20px rgba(45, 49, 56, 0.06);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .app {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ---------- Header (full-width white bar) ---------- */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .header-inner {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .back-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform .15s ease, opacity .15s ease;
+    color: var(--ink);
+  }
+  .back-btn:hover { transform: translateX(-2px); }
+  .back-btn:disabled { opacity: .35; cursor: default; transform: none; }
+  .back-btn svg { width: 20px; height: 20px; }
+
+  .progress {
+    flex: 1 1 auto;
+    height: 8px;
+    background: #e6e8ee;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 20%;
+    background: var(--green);
+    border-radius: 999px;
+    transition: width .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  .step-count {
+    flex: 0 0 auto;
+    font-weight: 700;
+    font-size: 18px;
+    color: #4a4f57;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* ---------- Content ---------- */
+  .content {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 140px;
+    overflow-y: auto;
+  }
+
+  .step { display: none; animation: fade .3s ease; }
+  .step.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .step-title {
+    text-align: center;
+    font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  /* ---------- Multi-select options ---------- */
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s ease, transform .1s ease, background .15s ease;
+    font: inherit;
+    color: var(--ink);
+  }
+  .option:hover { transform: translateY(-1px); }
+  .option:active { transform: translateY(0); }
+  .option.selected {
+    border-color: var(--green);
+    background: var(--green-soft);
+  }
+  .option-icon {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    color: var(--green);
+    display: grid;
+    place-items: center;
+  }
+  .option-icon svg { width: 28px; height: 28px; }
+  .option-label {
+    flex: 1 1 auto;
+    font-size: clamp(0.98rem, 2.6vw, 1.15rem);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  /* ---------- Slider cards ---------- */
+  .slider-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 28px 24px;
+    margin-bottom: 20px;
+  }
+  .slider-question {
+    font-size: clamp(1rem, 2.7vw, 1.2rem);
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .slider-value {
+    text-align: center;
+    font-size: clamp(2.4rem, 8vw, 3.2rem);
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1.1;
+    margin: 6px 0;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .slider-endnum {
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    flex: 0 0 auto;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--track-dark);
+    outline: none;
+    cursor: pointer;
+    /* fill via gradient set by JS */
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .range::-webkit-slider-thumb:active { transform: scale(1.15); }
+  .range::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: var(--ink-faint);
+    gap: 12px;
+  }
+  .slider-labels span:last-child { text-align: right; }
+
+  /* ---------- Footer button ---------- */
+  .footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px 24px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 70%, rgba(238,240,246,0));
+    display: flex;
+    justify-content: center;
+  }
+  .footer-inner { width: 100%; max-width: 712px; }
+
+  .primary-btn {
+    width: 100%;
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    background: linear-gradient(to right, var(--blue-1), var(--blue-2));
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(63, 111, 168, 0.3);
+    transition: transform .12s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(63,111,168,.38); }
+  .primary-btn:active { transform: translateY(0); }
+  .primary-btn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: none; }
+
+  /* ---------- Confirmation modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(30, 34, 40, 0.45);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .modal {
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    padding: 44px 34px 36px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    transform: translateY(16px) scale(.96);
+    transition: transform .3s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .modal-overlay.open .modal { transform: none; }
+
+  .modal-emoji { font-size: 3.4rem; line-height: 1; }
+  .modal h2 { font-size: 1.9rem; font-weight: 800; margin: 14px 0 8px; color: var(--ink); }
+  .modal p { color: var(--ink-soft); font-size: 1.05rem; line-height: 1.5; margin-bottom: 26px; }
+  .modal .primary-btn { max-width: none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 480px) {
+    .header { padding: 16px 16px; gap: 12px; }
+    .content { padding: 28px 16px 130px; }
+    .footer { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+    .option { padding: 18px 18px; gap: 14px; }
+    .slider-card { padding: 22px 20px 20px; }
+    .primary-btn { padding: 18px; font-size: 1.05rem; }
+  }
+
+  @media (min-width: 768px) {
+    .content { padding-left: 8px; padding-right: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-inner">
+      <button class="back-btn" id="backBtn" aria-label="Go back" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="step-count" id="stepCount">1/5</div>
+    </div>
+  </header>
+
+  <main class="content" id="content"></main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <button class="primary-btn" id="nextBtn">Continue →</button>
+    </div>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="modal-emoji">🎉</div>
+    <h2 id="modalTitle">Thank You!</h2>
+    <p>Your survey has been completed successfully.</p>
+    <button class="primary-btn" id="confirmBtn">Confirm · 30 XP 🎉</button>
+  </div>
+</div>
+
+<script>
+/* ---------- Icons ---------- */
+const ic = {
+  alcohol: '<path d="M6 2h11l-1 6a5 5 0 0 1-9 0L6 2Z"/><path d="M6.5 6H5a2 2 0 0 0-2 2v2a3 3 0 0 0 3 3h1"/><path d="M8 21h8M12 15v6"/>',
+  cannabis: '<path d="M11 20A7 7 0 0 1 4 13c0-5 3-9 7-11 4 2 7 6 7 11a7 7 0 0 1-7 7Z"/><path d="M11 20v0"/>',
+  stimulant: '<polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2"/>',
+  inhalant: '<path d="M9.5 4.5A2 2 0 1 1 11 8H2"/><path d="M12.5 15.5A2 2 0 1 0 14 12H2"/><path d="M17.5 7.5A2.5 2.5 0 1 1 20 10H5"/>',
+  sedative: '<path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7Z"/><path d="m8 8 8 8"/>',
+  hallucinogen: '<path d="m12 3 1.9 5.6L19.5 9l-4.5 3.3 1.7 5.7L12 14.7 7.3 18l1.7-5.7L4.5 9l5.6-.4L12 3Z"/><circle cx="18" cy="5" r="1"/>',
+  opioid: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>'
+};
+function svg(path, w) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`; }
+
+/* ---------- Survey definition ---------- */
+const steps = [
+  {
+    type: 'multi',
+    title: 'Which of these drugs have you used in the past 24 hours?',
+    cta: 'Continue →',
+    options: [
+      { id: 'alcohol', icon: ic.alcohol, label: 'Alcohol' },
+      { id: 'cannabis', icon: ic.cannabis, label: 'Cannabis (marijuana, pot, hash, K2, spice, etc.)' },
+      { id: 'stimulants', icon: ic.stimulant, label: 'Stimulants (cocaine, meth, speed, ecstasy, molly, Adderall, etc.)' },
+      { id: 'inhalants', icon: ic.inhalant, label: 'Inhalants (nitrous, glue, petrol, paint thinner, etc.)' },
+      { id: 'sedatives', icon: ic.sedative, label: 'Sedatives or sleeping pills (Valium, Serepax, Rohypnol, etc.)' },
+      { id: 'hallucinogens', icon: ic.hallucinogen, label: 'Hallucinogens (LSD, acid, mushrooms, PCP, special K, etc.)' },
+      { id: 'opioids', icon: ic.opioid, label: 'Opioids (heroin, morphine, methadone, oxycodone, fentanyl, etc.)' },
+    ]
+  },
+  {
+    type: 'sliders',
+    title: 'Thinking about the past 24 hours…',
+    cta: 'Next →',
+    sliders: [
+      { id: 'craving', question: 'How strong was your greatest craving to use opioids over the past 24 hours?', min: 'No craving', max: 'Extreme craving', showValue: true },
+      { id: 'risk', question: 'How risky was the riskiest situation (people, places, or things that interfere with your recovery) you experienced over the past 24 hours?', min: 'No risk', max: 'Extreme risk', showValue: true },
+      { id: 'stress', question: 'How stressful was the biggest hassle or stressful event you experienced over the past 24 hours?', min: 'No stress', max: 'Extreme stress', showValue: true },
+    ]
+  },
+  {
+    type: 'sliders',
+    title: 'Rate the strength of each of these emotions',
+    cta: 'Next →',
+    sliders: [
+      { id: 'depressed', question: 'Depressed', min: 'Not at all', max: 'Extremely', showValue: true },
+      { id: 'angry', question: 'Angry', min: 'Not at all', max: 'Extremely', showValue: true },
+      { id: 'anxious', question: 'Anxious', min: 'Not at all', max: 'Extremely', showValue: true },
+    ]
+  },
+  {
+    type: 'sliders',
+    title: 'Your body, the past 24 hours',
+    cta: 'Next →',
+    sliders: [
+      { id: 'sleep', question: 'How well did you sleep over the past 24 hours?', min: 'Very poor', max: 'Excellent', showValue: true },
+      { id: 'pain', question: 'How painful was your most intense pain over the past 24 hours?', min: 'No pain', max: 'Worst pain', showValue: true },
+    ]
+  },
+  {
+    type: 'sliders',
+    title: 'Thinking about the next week…',
+    cta: 'Finish · +30 XP 🎉',
+    sliders: [
+      { id: 'motivated', question: 'How motivated are you to avoid using opioids for non-medical reasons within the next week?', min: 'Not motivated', max: 'Extremely motivated', showValue: true },
+      { id: 'confident', question: 'How confident are you in your ability to avoid using opioids for non-medical reasons within the next week?', min: 'Not confident', max: 'Extremely confident', showValue: true },
+    ]
+  },
+];
+
+/* ---------- State ---------- */
+const answers = { multi: {}, sliders: {} };
+let current = 0;
+let finished = false;
+
+const content = document.getElementById('content');
+const progressFill = document.getElementById('progressFill');
+const stepCount = document.getElementById('stepCount');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function setRangeFill(range) {
+  const pct = (range.value / range.max) * 100;
+  range.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${pct}%, var(--track-dark) ${pct}%, var(--track-dark) 100%)`;
+}
+
+function render() {
+  const step = steps[current];
+  content.scrollTop = 0;
+  document.querySelector('.content').scrollTo(0, 0);
+
+  let html = `<div class="step active"><h1 class="step-title">${step.title}</h1>`;
+
+  if (step.type === 'multi') {
+    step.options.forEach(o => {
+      const sel = answers.multi[o.id] ? 'selected' : '';
+      html += `
+        <button class="option ${sel}" data-id="${o.id}">
+          <span class="option-icon">${svg(o.icon)}</span>
+          <span class="option-label">${o.label}</span>
+        </button>`;
+    });
+  } else {
+    step.sliders.forEach(s => {
+      const val = answers.sliders[s.id] ?? 5;
+      html += `
+        <div class="slider-card">
+          <div class="slider-question">${s.question}</div>
+          <div class="slider-value" id="val-${s.id}">${val}</div>
+          <div class="slider-row">
+            <span class="slider-endnum">0</span>
+            <input type="range" class="range" min="0" max="10" step="1" value="${val}" data-id="${s.id}" aria-label="${s.question}" />
+            <span class="slider-endnum">10</span>
+          </div>
+          <div class="slider-labels"><span>${s.min}</span><span>${s.max}</span></div>
+        </div>`;
+    });
+  }
+  html += `</div>`;
+  content.innerHTML = html;
+
+  // wire up
+  if (step.type === 'multi') {
+    content.querySelectorAll('.option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        answers.multi[id] = !answers.multi[id];
+        btn.classList.toggle('selected', answers.multi[id]);
+      });
+    });
+  } else {
+    content.querySelectorAll('.range').forEach(r => {
+      setRangeFill(r);
+      r.addEventListener('input', () => {
+        answers.sliders[r.dataset.id] = +r.value;
+        document.getElementById('val-' + r.dataset.id).textContent = r.value;
+        setRangeFill(r);
+      });
+      // ensure default is stored
+      if (answers.sliders[r.dataset.id] == null) answers.sliders[r.dataset.id] = +r.value;
+    });
+  }
+
+  // header + button
+  progressFill.style.width = ((current + 1) / steps.length * 100) + '%';
+  stepCount.textContent = `${current + 1}/${steps.length}`;
+  document.querySelector('.progress').setAttribute('aria-valuenow', current + 1);
+  backBtn.disabled = current === 0;
+  nextBtn.textContent = step.cta;
+}
+
+const modalOverlay = document.getElementById('modalOverlay');
+const confirmBtn = document.getElementById('confirmBtn');
+
+function openDoneModal() {
+  finished = true;
+  progressFill.style.width = '100%';
+  modalOverlay.classList.add('open');
+}
+
+confirmBtn.addEventListener('click', () => {
+  modalOverlay.classList.remove('open');
+  // reset the survey and return to the first step
+  finished = false;
+  current = 0;
+  answers.multi = {};
+  answers.sliders = {};
+  render();
+});
+
+backBtn.addEventListener('click', () => {
+  if (current > 0) { current--; render(); }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (current < steps.length - 1) {
+    current++;
+    render();
+  } else {
+    console.log('Survey answers:', JSON.parse(JSON.stringify(answers)));
+    openDoneModal();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
