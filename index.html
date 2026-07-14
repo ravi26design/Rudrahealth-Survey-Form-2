@@ -142,34 +142,25 @@
     gap: 12px;
     margin: 20px 0 30px;
   }
-  .logo-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    height: 40px;
+  .logo-mark {
+    height: 42px;
+    width: auto;
+    flex: 0 0 auto;
   }
-  .logo-bars i {
-    display: block;
-    width: 10px;
-    border-radius: 5px;
-  }
-  .logo-bars i:nth-child(1) { height: 24px; background: #eb8b6e; }
-  .logo-bars i:nth-child(2) { height: 40px; background: #9bbe6a; }
-  .logo-bars i:nth-child(3) { height: 32px; background: #6b9bd1; }
   .logo-text {
-    font-size: 2.1rem;
+    font-size: 2.2rem;
     font-weight: 800;
     letter-spacing: -0.01em;
     line-height: 1;
   }
-  .logo-text .l-dark { color: #414750; }
-  .logo-text .l-blue { color: #5b8db8; }
+  .logo-text .l-rudra { color: #e58b7e; }
+  .logo-text .l-health { color: #5e93c9; }
   .logo-text .l-ai {
     font-size: 0.85rem;
-    color: #eb8b6e;
+    color: #eec25c;
     font-weight: 700;
     vertical-align: super;
-    margin-left: 2px;
+    margin-left: 3px;
   }
 
   .intro-greeting {
@@ -588,8 +579,13 @@ function showIntro() {
   content.innerHTML = `
     <div class="intro">
       <div class="intro-logo">
-        <span class="logo-bars"><i></i><i></i><i></i></span>
-        <span class="logo-text"><span class="l-dark">Rudra</span><span class="l-blue">Health</span><span class="l-ai">ai</span></span>
+        <svg class="logo-mark" viewBox="0 0 54 46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2"  y="22" width="11" height="20" rx="5.5" fill="#e58b7e"/>
+          <rect x="17" y="14" width="11" height="28" rx="5.5" fill="#eec25c"/>
+          <rect x="32" y="16" width="11" height="26" rx="5.5" fill="#93be72"/>
+          <circle cx="37.5" cy="6.5" r="5.5" fill="#93be72"/>
+        </svg>
+        <span class="logo-text"><span class="l-rudra">Rudra</span><span class="l-health">Health</span><span class="l-ai">ai</span></span>
       </div>
       <h2 class="intro-greeting">Welcome to your daily check-in</h2>
       <p class="intro-help">Take a moment to reflect on your last 24 hours. It only takes about a minute, and there are no right or wrong answers.</p>
