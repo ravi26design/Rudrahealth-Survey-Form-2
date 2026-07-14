@@ -126,6 +126,54 @@
     line-height: 1.2;
   }
 
+  /* ---------- Intro / welcome screen ---------- */
+  .app.intro .header { display: none; }
+
+  .intro { padding: 8px 4px; }
+  .intro-logo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0 40px;
+  }
+  .logo-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 34px;
+  }
+  .logo-bars i {
+    display: block;
+    width: 9px;
+    border-radius: 4px;
+  }
+  .logo-bars i:nth-child(1) { height: 20px; background: #eb8b6e; }
+  .logo-bars i:nth-child(2) { height: 34px; background: #9bbe6a; }
+  .logo-bars i:nth-child(3) { height: 27px; background: #6b9bd1; }
+  .logo-text {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .logo-text .l-dark { color: #414750; }
+  .logo-text .l-blue { color: #5b8db8; }
+  .logo-text .l-ai {
+    font-size: 0.85rem;
+    color: #eb8b6e;
+    font-weight: 700;
+    vertical-align: super;
+    margin-left: 2px;
+  }
+  .intro-text {
+    font-size: clamp(1.05rem, 3vw, 1.2rem);
+    line-height: 1.6;
+    color: #55606d;
+    margin-bottom: 20px;
+  }
+  .intro-text b { color: var(--ink); font-weight: 800; }
+
   /* ---------- Multi-select options ---------- */
   .option {
     display: flex;
@@ -434,12 +482,37 @@ const steps = [
 const answers = { multi: {}, sliders: {} };
 let current = 0;
 let finished = false;
+let started = false;
 
+const app = document.querySelector('.app');
 const content = document.getElementById('content');
 const progressFill = document.getElementById('progressFill');
 const stepCount = document.getElementById('stepCount');
 const backBtn = document.getElementById('backBtn');
 const nextBtn = document.getElementById('nextBtn');
+
+function showIntro() {
+  started = false;
+  finished = false;
+  app.classList.add('intro');
+  content.innerHTML = `
+    <div class="intro">
+      <div class="intro-logo">
+        <span class="logo-bars"><i></i><i></i><i></i></span>
+        <span class="logo-text"><span class="l-dark">Rudra</span><span class="l-blue">Health</span><span class="l-ai">ai</span></span>
+      </div>
+      <p class="intro-text">You are completing a <b>practice</b> survey. Your answers will not be part of your real survey answers.</p>
+      <p class="intro-text">This survey asks about your recent <b>alcohol use</b>, <b>recovery activities</b>, <b>mood</b>, and <b>daily experiences</b>.</p>
+    </div>`;
+  nextBtn.textContent = "Let's start →";
+}
+
+function startSurvey() {
+  started = true;
+  current = 0;
+  app.classList.remove('intro');
+  render();
+}
 
 function setRangeFill(range) {
   const pct = (range.value / range.max) * 100;
@@ -507,7 +580,7 @@ function render() {
   progressFill.style.width = ((current + 1) / steps.length * 100) + '%';
   stepCount.textContent = `${current + 1}/${steps.length}`;
   document.querySelector('.progress').setAttribute('aria-valuenow', current + 1);
-  backBtn.disabled = current === 0;
+  backBtn.disabled = false;
   nextBtn.textContent = step.cta;
 }
 
@@ -522,20 +595,21 @@ function openDoneModal() {
 
 confirmBtn.addEventListener('click', () => {
   modalOverlay.classList.remove('open');
-  // reset the survey and return to the first step
-  finished = false;
-  current = 0;
+  // reset answers and return to the welcome screen
   answers.multi = {};
   answers.sliders = {};
-  render();
+  showIntro();
 });
 
 backBtn.addEventListener('click', () => {
   if (current > 0) { current--; render(); }
+  else { showIntro(); }
 });
 
 nextBtn.addEventListener('click', () => {
-  if (current < steps.length - 1) {
+  if (!started) {
+    startSurvey();
+  } else if (current < steps.length - 1) {
     current++;
     render();
   } else {
@@ -544,7 +618,7 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
-render();
+showIntro();
 </script>
 </body>
 </html>
